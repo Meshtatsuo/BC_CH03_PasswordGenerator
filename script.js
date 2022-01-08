@@ -6,6 +6,17 @@ let passwordReqs = {
   numberRequired: true,
   specialCharactersRequired: true,
 };
+// Create character sets for each type to randomly pull from
+let randomCharset = {
+  fullCharset:
+    ":>?<,./;=-`~!@#$%^&*_+}{0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+  lettersOnly: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+  symbolsOnly: ":>?<,./;=-`~!@#$%^&*_+}{",
+  lettersAndNumbers:
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+  lettersAndSymbols:
+    ":>?<,./;=-`~!@#$%^&*_+}{ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+};
 
 let lenghtMax = 128;
 let lengthMin = 8;
@@ -111,17 +122,118 @@ function determineRequirements() {
 }
 
 function generatePassword() {
-  // determineRequirements();
-
   let generatedPassword = [];
-
+  debugger;
   //Generate random string of lowercase letters to start
-  for (let i = 0; i < passwordReqs.length; i++) {
-    generatedPassword[i] = Math.random().toString(36).substring(2, 3);
-    console.log(generatedPassword[i]);
+
+  if (
+    passwordReqs.specialCharactersRequired === true &&
+    passwordReqs.numberRequired === true
+  ) {
+    for (let i = 0; i < passwordReqs.length; i++) {
+      generatedPassword[i] =
+        randomCharset.fullCharset[
+          // Find random character in the full character set
+          Math.floor(Math.random() * randomCharset.fullCharset.length)
+        ];
+
+      console.log(generatedPassword[i]);
+    }
+  } else if (
+    passwordReqs.specialCharactersRequired === false &&
+    passwordReqs.numberRequired === false
+  ) {
+    for (let i = 0; i < passwordReqs.length; i++) {
+      generatedPassword[i] =
+        randomCharset.lettersOnly[
+          // Find random character in the full character set
+          Math.floor(Math.random() * randomCharset.lettersOnly.length)
+        ];
+
+      console.log(generatedPassword[i]);
+    }
+  } else if (
+    passwordReqs.specialCharactersRequired === true &&
+    passwordReqs.numberRequired === false
+  ) {
+    for (let i = 0; i < passwordReqs.length; i++) {
+      generatedPassword[i] =
+        randomCharset.lettersAndSymbols[
+          // Find random character in the full character set
+          Math.floor(Math.random() * randomCharset.lettersAndSymbols.length)
+        ];
+
+      console.log(generatedPassword[i]);
+    }
+  } else {
+    for (let i = 0; i < passwordReqs.length; i++) {
+      generatedPassword[i] =
+        randomCharset.lettersAndNumbers[
+          // Find random character in the full character set
+          Math.floor(Math.random() * randomCharset.lettersAndNumbers.length)
+        ];
+
+      console.log(generatedPassword[i]);
+    }
   }
-  generatedPassword.join("");
+
   return generatedPassword;
+}
+
+function validatePassword(candidate) {
+  // Testing variables
+  let character = "";
+  let upperIsValid = false;
+  let lowerIsValid = false;
+  let numberIsValid = false;
+  let symbolIsValid = false;
+  debugger;
+  // Check for upper case letters
+  for (let i = 0; i <= candidate.length - 1; i++) {
+    character = candidate.charAt(i);
+    // check for upper case letter
+    if (
+      character === character.toUpperCase() &&
+      randomCharset.lettersOnly.includes(character)
+    ) {
+      upperIsValid = true;
+      console.log("Validation: Upper case letter found.");
+    }
+    // Check  for lower case letter
+    else if (
+      character === character.toLowerCase() &&
+      randomCharset.lettersOnly.includes(character)
+    ) {
+      lowerIsValid = true;
+      console.log("Validation: Lower case letter found.");
+    }
+    // check for number
+    // soft validation as we don't need  type equal, just that value is equal
+    else if (character == parseInt(character)) {
+      numberIsValid = true;
+      console.log("Validation: Number found.");
+    }
+    // Use symbol character set to check for symbol.
+    else if (randomCharset.symbolsOnly.includes(character)) {
+      symbolIsValid = true;
+      console.log("validation: Symbol found.");
+    }
+  }
+  debugger;
+  console.log(candidate.length);
+  console.log(passwordReqs.length);
+  // if the two objects are equal in value, then the password is validated.
+  if (
+    candidate.length == passwordReqs.length &&
+    candidate.upperIsValid == passwordReqs.upperRequired &&
+    candidate.lowerIsValid == passwordReqs.lowerRequired &&
+    candidate.numberIsValid == passwordReqs.numberRequired &&
+    candidate.symbolIsValid == passwordReqs.specialCharactersRequired
+  ) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 // Get references to the #generate element
@@ -129,10 +241,18 @@ var generateBtn = document.querySelector("#generate");
 
 // Write password to the #password input
 function writePassword() {
+  determineRequirements();
   var password = generatePassword();
-  var passwordText = document.querySelector("#password");
-  //using "join" removes the "," that separate each item in the array
-  passwordText.value = password.join("");
+  //using "join" removes the "," that separate each item in the array. This should prevent validator from seeing symbols in non symbol passwords.
+  let validated = validatePassword(password.join(""));
+  if (validated) {
+    var passwordText = document.querySelector("#password");
+    //using "join" removes the "," that separate each item in the array
+    passwordText.value = password.join("");
+  } else {
+    console.log("ERROR. PASSWORD INVALID");
+    generatePassword;
+  }
 }
 
 // Add event listener to generate button
