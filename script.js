@@ -1,8 +1,8 @@
 // Password requirement object. All requirements set to true by default.
 let passwordReqs = {
   length: 15,
-  upperRequired: true,
-  lowerRequired: true,
+  haveUpper: true,
+  haveLower: true,
   numberRequired: true,
   specialCharactersRequired: true,
 };
@@ -79,9 +79,9 @@ function determineRequirements() {
   // Receive upper case requirement
   response = promptUser("upper");
   if (response === "YES") {
-    passwordReqs.upperRequired = true;
+    passwordReqs.haveUpper = true;
   } else if ((response = "NO")) {
-    passwordReqs.upperRequired = false;
+    passwordReqs.haveUpper = false;
   } else {
     window.alert("You entered an invalid response. Please try again.");
     generatePassword();
@@ -90,9 +90,9 @@ function determineRequirements() {
   // Receive lower case requirement
   response = promptUser("lower");
   if (response === "YES") {
-    passwordReqs.lowerRequired = true;
+    passwordReqs.haveLower = true;
   } else if (response === "NO") {
-    passwordReqs.lowerRequired = false;
+    passwordReqs.haveLower = false;
   } else {
     window.alert("You entered an invalid response. Please try again.");
     generatePassword();
@@ -123,7 +123,7 @@ function determineRequirements() {
 
 function generatePassword() {
   let generatedPassword = [];
-  debugger;
+
   //Generate random string of lowercase letters to start
 
   if (
@@ -180,14 +180,31 @@ function generatePassword() {
   return generatedPassword;
 }
 
-function validatePassword(candidate) {
+function validateLetterCase(generatedPassword) {
+  // uppercase all values in password if required
+  if (passwordReqs.haveUpper && !passwordReqs.haveLower) {
+    generatedPassword = generatedPassword.toUpperCase();
+  }
+  // lowercase all values in password if required
+  else if (!passwordReqs.haveUpper && passwordReqs.haveLower) {
+    generatedPassword = generatedPassword.toLowerCase();
+  }
+
+  console.log(generatedPassword);
+  return generatedPassword;
+}
+
+function validatePassword(generatedPassword) {
+  debugger;
+  let candidate = validateLetterCase(generatedPassword);
   // Testing variables
   let character = "";
+  let candidateLength = candidate.length;
   let upperIsValid = false;
   let lowerIsValid = false;
   let numberIsValid = false;
   let symbolIsValid = false;
-  debugger;
+
   // Check for upper case letters
   for (let i = 0; i <= candidate.length - 1; i++) {
     character = candidate.charAt(i);
@@ -219,20 +236,18 @@ function validatePassword(candidate) {
       console.log("validation: Symbol found.");
     }
   }
-  debugger;
+
   console.log(candidate.length);
   console.log(passwordReqs.length);
   // if the two objects are equal in value, then the password is validated.
   if (
-    candidate.length == passwordReqs.length &&
-    candidate.upperIsValid == passwordReqs.upperRequired &&
-    candidate.lowerIsValid == passwordReqs.lowerRequired &&
-    candidate.numberIsValid == passwordReqs.numberRequired &&
-    candidate.symbolIsValid == passwordReqs.specialCharactersRequired
+    candidateLength == passwordReqs.length &&
+    upperIsValid == passwordReqs.haveUpper &&
+    lowerIsValid == passwordReqs.haveLower &&
+    numberIsValid == passwordReqs.numberRequired &&
+    symbolIsValid == passwordReqs.specialCharactersRequired
   ) {
-    return true;
-  } else {
-    return false;
+    return candidate;
   }
 }
 
@@ -248,10 +263,10 @@ function writePassword() {
   if (validated) {
     var passwordText = document.querySelector("#password");
     //using "join" removes the "," that separate each item in the array
-    passwordText.value = password.join("");
+    passwordText.value = validated;
   } else {
     console.log("ERROR. PASSWORD INVALID");
-    generatePassword;
+    generatePassword();
   }
 }
 
