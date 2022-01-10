@@ -1,4 +1,10 @@
 // Password requirement object. All requirements set to true by default.
+
+let attempt = 1;
+// Limit the number of loops the code attempts to make while generating a valid password to prevent hanging.
+let maxAttempts = 10;
+
+// Requirements are made by the user
 let passwordReqs = {
   length: 15,
   haveUpper: true,
@@ -17,10 +23,11 @@ let randomCharset = {
   lettersAndSymbols:
     ":>?<,./;=-`~!@#$%^&*_+}{ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
 };
-
+// global max and min length variables for password length
 let lenghtMax = 128;
 let lengthMin = 8;
 
+// General prompt user function to return a true or false statement
 function promptUser(requirement) {
   let response = "";
   switch (requirement) {
@@ -60,8 +67,10 @@ function promptUser(requirement) {
   }
 }
 
+// Prompts user and sets password requirements
 function determineRequirements() {
   //Receive requirements from the user
+  attempt = 1;
 
   // Receive length requirement and add it to requirements object
   let response = promptUser("length");
@@ -119,8 +128,10 @@ function determineRequirements() {
   }
 
   console.log(passwordReqs);
+  writePassword();
 }
 
+// Generates a randomly generated password pulling from the appropriate character set
 function generatePassword() {
   let generatedPassword = [];
 
@@ -180,6 +191,7 @@ function generatePassword() {
   return generatedPassword;
 }
 
+// Removes upper or lower case characters based on password requirements
 function validateLetterCase(generatedPassword) {
   // uppercase all values in password if required
   if (passwordReqs.haveUpper && !passwordReqs.haveLower) {
@@ -194,8 +206,8 @@ function validateLetterCase(generatedPassword) {
   return generatedPassword;
 }
 
+// Validates the generated password based on password requirements
 function validatePassword(generatedPassword) {
-  debugger;
   let candidate = validateLetterCase(generatedPassword);
   // Testing variables
   let character = "";
@@ -248,6 +260,8 @@ function validatePassword(generatedPassword) {
     symbolIsValid == passwordReqs.specialCharactersRequired
   ) {
     return candidate;
+  } else {
+    return null;
   }
 }
 
@@ -256,19 +270,30 @@ var generateBtn = document.querySelector("#generate");
 
 // Write password to the #password input
 function writePassword() {
-  determineRequirements();
+  var passwordText = document.querySelector("#password");
   var password = generatePassword();
   //using "join" removes the "," that separate each item in the array. This should prevent validator from seeing symbols in non symbol passwords.
   let validated = validatePassword(password.join(""));
+  //if password validates, enter password into text field
   if (validated) {
-    var passwordText = document.querySelector("#password");
-    //using "join" removes the "," that separate each item in the array
+    console.log("Success!");
+    // update text in textbox to generated value and log the number of attempts
+    console.log(attempt);
     passwordText.value = validated;
-  } else {
+  }
+  //if password fails to validate, generate a new password
+  else {
     console.log("ERROR. PASSWORD INVALID");
-    generatePassword();
+    attempt += maxAttempts;
+    if (attempt <= 1) {
+      writePassword();
+    } else {
+      // If too many attempts were made, spit out an error and ask user to try again
+      console.log("Too many attempts!");
+      passwordText.value = "ERROR! Please Try Again!";
+    }
   }
 }
 
 // Add event listener to generate button
-generateBtn.addEventListener("click", writePassword);
+generateBtn.addEventListener("click", determineRequirements);
