@@ -20,4 +20,4 @@ This password generator prompts the user for a password length (between 8 and 12
 
 ## Preview
 
-(coming soon)
+![Preview Gif](https://github.com/Meshtatsuo/BC_CH03_PasswordGenerator/blob/main/preview.gif?raw=true)
