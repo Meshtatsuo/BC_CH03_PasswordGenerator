@@ -2,7 +2,7 @@
 
 let attempt = 1;
 // Limit the number of loops the code attempts to make while generating a valid password to prevent hanging.
-let maxAttempts = 10;
+let maxAttempts = 100;
 
 // Requirements are made by the user
 let passwordReqs = {
@@ -14,17 +14,23 @@ let passwordReqs = {
 };
 // Create character sets for each type to randomly pull from
 let randomCharset = {
+  // If requires upper, lower, numbers, and symbols
   fullCharset:
     ":>?<,./;=-`~!@#$%^&*_+}{0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+  //if requires only letters
   lettersOnly: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+  //symbol charset for validation
   symbolsOnly: ":>?<,./;=-`~!@#$%^&*_+}{",
+  //if requires letters and numbers
   lettersAndNumbers:
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+  //if requires letters and symbols
   lettersAndSymbols:
     ":>?<,./;=-`~!@#$%^&*_+}{ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
 };
+
 // global max and min length variables for password length
-let lenghtMax = 128;
+let lengthMax = 128;
 let lengthMin = 8;
 
 // General prompt user function to return a true or false statement
@@ -32,37 +38,84 @@ function promptUser(requirement) {
   let response = "";
   switch (requirement) {
     case "length":
-      response = window.prompt(
-        "How long should the password be? (Enter number between 8 and 128"
-      );
-      return response;
+      while (!response) {
+        response = window.prompt(
+          "How long should the password be? (Enter number between 8 and 128"
+        );
+      }
+      if (
+        parseInt(response) &&
+        lengthMin <= parseInt(response) &&
+        parseInt(response) <= lengthMax
+      ) {
+        return response;
+      } else {
+        alert(
+          "Please enter a value between " + lengthMin + " and " + lengthMax
+        );
+        promptUser(requirement);
+      }
 
     case "upper":
-      response = window.prompt(
-        "Should this password have upper case letters? (yes or no)"
-      );
+      while (!response) {
+        response = window.prompt(
+          "Should this password have upper case letters? (yes or no)"
+        );
+      }
+
       response = response.toUpperCase();
+      if (response === "YES" || response === "NO") {
+        break;
+      } else if (response !== "YES" && response !== "NO") {
+        alert("Please enter 'yes' or 'no'.");
+        promptUser(requirement);
+      }
       return response;
 
     case "lower":
-      response = window.prompt(
-        "Should this password have lower case letters? (yes or no)"
-      );
+      while (!response) {
+        response = window.prompt(
+          "Should this password have lower case letters? (yes or no)"
+        );
+      }
       response = response.toUpperCase();
+      if (response === "YES" || response === "NO") {
+        break;
+      } else if (response !== "YES" && response !== "NO") {
+        alert("Please enter 'yes' or 'no'.");
+        promptUser(requirement);
+      }
       return response;
 
     case "numeric":
-      response = window.prompt(
-        "Should this password have numbers? (yes or no)"
-      );
+      while (!response) {
+        response = window.prompt(
+          "Should this password have numbers? (yes or no)"
+        );
+      }
       response = response.toUpperCase();
+      if (response === "YES" || response === "NO") {
+        break;
+      } else if (response !== "YES" && response !== "NO") {
+        alert("Please enter 'yes' or 'no'.");
+        promptUser(requirement);
+      }
       return response;
 
     case "special":
-      response = window.prompt(
-        "Should this password have special characters? (yes or no)"
-      );
-      response = response.toUpperCase();
+      while (!response) {
+        debugger;
+        response = window.prompt(
+          "Should this password have special characters? (yes or no)"
+        );
+        response = response.toUpperCase();
+        if (response === "YES" || response === "NO") {
+          break;
+        } else if (response !== "YES" && response !== "NO") {
+          alert("Please enter 'yes' or 'no'.");
+          promptUser(requirement);
+        }
+      }
       return response;
   }
 }
@@ -74,15 +127,8 @@ function determineRequirements() {
 
   // Receive length requirement and add it to requirements object
   let response = promptUser("length");
-  if (
-    parseInt(response) &&
-    parseInt(response) >= 8 &&
-    parseInt(response) <= 128
-  ) {
+  if (response) {
     passwordReqs.length = parseInt(response);
-  } else {
-    window.alert("You entered an invalid response. Please try again.");
-    generatePassword();
   }
 
   // Receive upper case requirement
@@ -91,30 +137,21 @@ function determineRequirements() {
     passwordReqs.haveUpper = true;
   } else if ((response = "NO")) {
     passwordReqs.haveUpper = false;
-  } else {
-    window.alert("You entered an invalid response. Please try again.");
-    generatePassword();
   }
-
   // Receive lower case requirement
   response = promptUser("lower");
   if (response === "YES") {
     passwordReqs.haveLower = true;
   } else if (response === "NO") {
     passwordReqs.haveLower = false;
-  } else {
-    window.alert("You entered an invalid response. Please try again.");
-    generatePassword();
   }
+
   //receive numerical requirement
   response = promptUser("numeric");
   if (response === "YES") {
     passwordReqs.numberRequired = true;
   } else if (response === "NO") {
     passwordReqs.numberRequired = false;
-  } else {
-    window.alert("You entered an invalid response. Please try again.");
-    generatePassword();
   }
   // Receive special characters requirement
   response = promptUser("special");
@@ -122,12 +159,8 @@ function determineRequirements() {
     passwordReqs.specialCharactersRequired = true;
   } else if (response === "NO") {
     passwordReqs.specialCharactersRequired = false;
-  } else {
-    window.alert("You entered an invalid response. Please try again.");
-    generatePassword();
   }
 
-  console.log(passwordReqs);
   writePassword();
 }
 
@@ -147,8 +180,6 @@ function generatePassword() {
           // Find random character in the full character set
           Math.floor(Math.random() * randomCharset.fullCharset.length)
         ];
-
-      console.log(generatedPassword[i]);
     }
   } else if (
     passwordReqs.specialCharactersRequired === false &&
@@ -160,8 +191,6 @@ function generatePassword() {
           // Find random character in the full character set
           Math.floor(Math.random() * randomCharset.lettersOnly.length)
         ];
-
-      console.log(generatedPassword[i]);
     }
   } else if (
     passwordReqs.specialCharactersRequired === true &&
@@ -173,8 +202,6 @@ function generatePassword() {
           // Find random character in the full character set
           Math.floor(Math.random() * randomCharset.lettersAndSymbols.length)
         ];
-
-      console.log(generatedPassword[i]);
     }
   } else {
     for (let i = 0; i < passwordReqs.length; i++) {
@@ -183,8 +210,6 @@ function generatePassword() {
           // Find random character in the full character set
           Math.floor(Math.random() * randomCharset.lettersAndNumbers.length)
         ];
-
-      console.log(generatedPassword[i]);
     }
   }
 
@@ -202,7 +227,6 @@ function validateLetterCase(generatedPassword) {
     generatedPassword = generatedPassword.toLowerCase();
   }
 
-  console.log(generatedPassword);
   return generatedPassword;
 }
 
@@ -249,8 +273,6 @@ function validatePassword(generatedPassword) {
     }
   }
 
-  console.log(candidate.length);
-  console.log(passwordReqs.length);
   // if the two objects are equal in value, then the password is validated.
   if (
     candidateLength == passwordReqs.length &&
@@ -272,28 +294,28 @@ var generateBtn = document.querySelector("#generate");
 function writePassword() {
   var passwordText = document.querySelector("#password");
   var password = generatePassword();
-  //using "join" removes the "," that separate each item in the array. This should prevent validator from seeing symbols in non symbol passwords.
+  //using "join" removes the "," that separate each item in the array
   let validated = validatePassword(password.join(""));
   //if password validates, enter password into text field
   if (validated) {
-    console.log("Success!");
     // update text in textbox to generated value and log the number of attempts
-    console.log(attempt);
+    console.log("attempt: " + attempt);
     passwordText.value = validated;
   }
   //if password fails to validate, generate a new password
   else {
-    console.log("ERROR. PASSWORD INVALID");
+    console.log("ERROR. PASSWORD INVALID. ATTEMPT: " + attempt);
     attempt += maxAttempts;
     if (attempt <= 1) {
       writePassword();
     } else {
       // If too many attempts were made, spit out an error and ask user to try again
-      console.log("Too many attempts!");
+      console.log("Failed after " + attempt + " attempts.");
       passwordText.value = "ERROR! Please Try Again!";
     }
   }
 }
 
-// Add event listener to generate button
+// Add event listener to generate button, calling the determineRequirements function.
+// NOTE: changed function that the event listener calls so that we can recall the writePassword function again when needed
 generateBtn.addEventListener("click", determineRequirements);
