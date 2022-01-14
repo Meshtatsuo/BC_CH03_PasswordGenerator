@@ -238,7 +238,6 @@ function validatePassword(generatedPassword) {
       randomCharset.lettersOnly.includes(character)
     ) {
       upperIsValid = true;
-      console.log("Validation: Upper case letter found.");
     }
     // Check  for lower case letter
     else if (
@@ -246,18 +245,15 @@ function validatePassword(generatedPassword) {
       randomCharset.lettersOnly.includes(character)
     ) {
       lowerIsValid = true;
-      console.log("Validation: Lower case letter found.");
     }
     // check for number
     // soft validation as we don't need  type equal, just that value is equal
     else if (character == parseInt(character)) {
       numberIsValid = true;
-      console.log("Validation: Number found.");
     }
     // Use symbol character set to check for symbol.
     else if (randomCharset.symbolsOnly.includes(character)) {
       symbolIsValid = true;
-      console.log("validation: Symbol found.");
     }
   }
 
@@ -287,7 +283,6 @@ function writePassword() {
   //if password validates, enter password into text field
 
   if (validated) {
-    console.log("Password validated after " + attempt + " attempts.");
     passwordText.value = validated;
   }
   //if password fails to validate, generate a new password
