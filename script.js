@@ -1,8 +1,6 @@
 // Password requirement object. All requirements set to true by default.
 
 let attempt = 1;
-// Limit the number of loops the code attempts to make while generating a valid password to prevent hanging.
-let maxAttempts = 100;
 
 // Requirements are made by the user
 let passwordReqs = {
@@ -27,96 +25,31 @@ let randomCharset = {
   //if requires letters and symbols
   lettersAndSymbols:
     ":>?<,./;=-`~!@#$%^&*_+}{ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+  symbolsAndNumbers: ":>?<,./;=-`~!@#$%^&*_+}{0123456789",
+  numbers: "0123456789",
 };
 
 // global max and min length variables for password length
 let lengthMax = 128;
 let lengthMin = 8;
 
-// General prompt user function to return a true or false statement
-function promptUser(requirement) {
+// Prompt user for password length, determine if it meets requirements, then returns
+function requestPasswordLength() {
   let response = "";
-  switch (requirement) {
-    case "length":
-      while (!response) {
-        response = window.prompt(
-          "How long should the password be? (Enter number between 8 and 128"
-        );
-      }
-      if (
-        parseInt(response) &&
-        lengthMin <= parseInt(response) &&
-        parseInt(response) <= lengthMax
-      ) {
-        return response;
-      } else {
-        alert(
-          "Please enter a value between " + lengthMin + " and " + lengthMax
-        );
-        promptUser(requirement);
-      }
-
-    case "upper":
-      while (!response) {
-        response = window.prompt(
-          "Should this password have upper case letters? (yes or no)"
-        );
-      }
-
-      response = response.toUpperCase();
-      if (response === "YES" || response === "NO") {
-        break;
-      } else if (response !== "YES" && response !== "NO") {
-        alert("Please enter 'yes' or 'no'.");
-        promptUser(requirement);
-      }
-      return response;
-
-    case "lower":
-      while (!response) {
-        response = window.prompt(
-          "Should this password have lower case letters? (yes or no)"
-        );
-      }
-      response = response.toUpperCase();
-      if (response === "YES" || response === "NO") {
-        break;
-      } else if (response !== "YES" && response !== "NO") {
-        alert("Please enter 'yes' or 'no'.");
-        promptUser(requirement);
-      }
-      return response;
-
-    case "numeric":
-      while (!response) {
-        response = window.prompt(
-          "Should this password have numbers? (yes or no)"
-        );
-      }
-      response = response.toUpperCase();
-      if (response === "YES" || response === "NO") {
-        break;
-      } else if (response !== "YES" && response !== "NO") {
-        alert("Please enter 'yes' or 'no'.");
-        promptUser(requirement);
-      }
-      return response;
-
-    case "special":
-      while (!response) {
-        debugger;
-        response = window.prompt(
-          "Should this password have special characters? (yes or no)"
-        );
-        response = response.toUpperCase();
-        if (response === "YES" || response === "NO") {
-          break;
-        } else if (response !== "YES" && response !== "NO") {
-          alert("Please enter 'yes' or 'no'.");
-          promptUser(requirement);
-        }
-      }
-      return response;
+  while (!response) {
+    response = window.prompt(
+      "How long should the password be? (Enter number between 8 and 128"
+    );
+  }
+  if (
+    parseInt(response) &&
+    lengthMin <= parseInt(response) &&
+    parseInt(response) <= lengthMax
+  ) {
+    return response;
+  } else {
+    alert("Please enter a value between " + lengthMin + " and " + lengthMax);
+    requestPasswordLength();
   }
 }
 
@@ -126,40 +59,30 @@ function determineRequirements() {
   attempt = 1;
 
   // Receive length requirement and add it to requirements object
-  let response = promptUser("length");
+  let response = requestPasswordLength();
   if (response) {
     passwordReqs.length = parseInt(response);
   }
 
   // Receive upper case requirement
-  response = promptUser("upper");
-  if (response === "YES") {
-    passwordReqs.haveUpper = true;
-  } else if ((response = "NO")) {
-    passwordReqs.haveUpper = false;
-  }
+  passwordReqs.haveUpper = confirm(
+    "Press 'OK' to confirm upper case letter requirement, otherwise press 'CANCEL'"
+  );
+
   // Receive lower case requirement
-  response = promptUser("lower");
-  if (response === "YES") {
-    passwordReqs.haveLower = true;
-  } else if (response === "NO") {
-    passwordReqs.haveLower = false;
-  }
+  passwordReqs.haveLower = confirm(
+    "Press 'OK' to confirm lower case letter requirement, otherwise press 'CANCEL'"
+  );
 
   //receive numerical requirement
-  response = promptUser("numeric");
-  if (response === "YES") {
-    passwordReqs.numberRequired = true;
-  } else if (response === "NO") {
-    passwordReqs.numberRequired = false;
-  }
+  passwordReqs.numberRequired = confirm(
+    "Press 'OK' to confirm number requirement, otherwise press 'CANCEL'"
+  );
+
   // Receive special characters requirement
-  response = promptUser("special");
-  if (response === "YES") {
-    passwordReqs.specialCharactersRequired = true;
-  } else if (response === "NO") {
-    passwordReqs.specialCharactersRequired = false;
-  }
+  passwordReqs.specialCharactersRequired = confirm(
+    "Press 'OK' to confirm symbol requirement, otherwise press 'CANCEL'"
+  );
 
   writePassword();
 }
@@ -168,12 +91,24 @@ function determineRequirements() {
 function generatePassword() {
   let generatedPassword = [];
 
-  //Generate random string of lowercase letters to start
-
+  //If all false, prompt user that we need *some* requirements!
   if (
-    passwordReqs.specialCharactersRequired === true &&
-    passwordReqs.numberRequired === true
+    passwordReqs.specialCharactersRequired === false &&
+    passwordReqs.numberRequired === false &&
+    passwordReqs.haveUpper === false &&
+    passwordReqs.haveLower === false
   ) {
+    alert("We need SOME requirements if you want a password! Try again.");
+    determineRequirements();
+  }
+  //If all true, pull from full char set
+  else if (
+    passwordReqs.specialCharactersRequired === true &&
+    passwordReqs.numberRequired === true &&
+    passwordReqs.haveUpper === true &&
+    passwordReqs.haveLower === true
+  ) {
+    //Pull from full character set if all are required
     for (let i = 0; i < passwordReqs.length; i++) {
       generatedPassword[i] =
         randomCharset.fullCharset[
@@ -181,9 +116,12 @@ function generatePassword() {
           Math.floor(Math.random() * randomCharset.fullCharset.length)
         ];
     }
-  } else if (
+  }
+  // User letters only if no numbers or symbols wanted
+  else if (
     passwordReqs.specialCharactersRequired === false &&
-    passwordReqs.numberRequired === false
+    passwordReqs.numberRequired === false &&
+    (passwordReqs.haveUpper === true || passwordReqs.haveLower === true)
   ) {
     for (let i = 0; i < passwordReqs.length; i++) {
       generatedPassword[i] =
@@ -192,9 +130,12 @@ function generatePassword() {
           Math.floor(Math.random() * randomCharset.lettersOnly.length)
         ];
     }
-  } else if (
+  }
+  // Pull from letters and symbols if numbers aren't required
+  else if (
     passwordReqs.specialCharactersRequired === true &&
-    passwordReqs.numberRequired === false
+    passwordReqs.numberRequired === false &&
+    (passwordReqs.haveUpper === true || passwordReqs.haveLower === true)
   ) {
     for (let i = 0; i < passwordReqs.length; i++) {
       generatedPassword[i] =
@@ -203,7 +144,54 @@ function generatePassword() {
           Math.floor(Math.random() * randomCharset.lettersAndSymbols.length)
         ];
     }
-  } else {
+  }
+  // Pull from numbers and symbols if no letters required
+  else if (
+    passwordReqs.specialCharactersRequired === true &&
+    passwordReqs.numberRequired === true &&
+    passwordReqs.haveUpper === false &&
+    passwordReqs.haveLower === false
+  ) {
+    for (let i = 0; i < passwordReqs.length; i++) {
+      generatedPassword[i] =
+        randomCharset.symbolsAndNumbers[
+          // Find random character in the full character set
+          Math.floor(Math.random() * randomCharset.symbolsAndNumbers.length)
+        ];
+    }
+  }
+  // Pull from numbers Only
+  else if (
+    passwordReqs.specialCharactersRequired === false &&
+    passwordReqs.numberRequired === true &&
+    passwordReqs.haveUpper === false &&
+    passwordReqs.haveLower === false
+  ) {
+    for (let i = 0; i < passwordReqs.length; i++) {
+      generatedPassword[i] =
+        randomCharset.numbers[
+          // Find random character in the full character set
+          Math.floor(Math.random() * randomCharset.numbers.length)
+        ];
+    }
+  }
+  // Pull from symbols only
+  else if (
+    passwordReqs.specialCharactersRequired === true &&
+    passwordReqs.numberRequired === false &&
+    passwordReqs.haveUpper === false &&
+    passwordReqs.haveLower === false
+  ) {
+    for (let i = 0; i < passwordReqs.length; i++) {
+      generatedPassword[i] =
+        randomCharset.symbolsOnly[
+          // Find random character in the full character set
+          Math.floor(Math.random() * randomCharset.symbolsOnly.length)
+        ];
+    }
+  }
+  // Otherwise letters and numbers are required, but no symbols. pull from letters and numbers
+  else {
     for (let i = 0; i < passwordReqs.length; i++) {
       generatedPassword[i] =
         randomCharset.lettersAndNumbers[
@@ -297,22 +285,15 @@ function writePassword() {
   //using "join" removes the "," that separate each item in the array
   let validated = validatePassword(password.join(""));
   //if password validates, enter password into text field
+
   if (validated) {
-    // update text in textbox to generated value and log the number of attempts
-    console.log("attempt: " + attempt);
+    console.log("Password validated after " + attempt + " attempts.");
     passwordText.value = validated;
   }
   //if password fails to validate, generate a new password
   else {
-    console.log("ERROR. PASSWORD INVALID. ATTEMPT: " + attempt);
-    attempt += maxAttempts;
-    if (attempt <= 1) {
-      writePassword();
-    } else {
-      // If too many attempts were made, spit out an error and ask user to try again
-      console.log("Failed after " + attempt + " attempts.");
-      passwordText.value = "ERROR! Please Try Again!";
-    }
+    attempt += 1;
+    writePassword();
   }
 }
 
