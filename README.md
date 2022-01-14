@@ -19,3 +19,5 @@ This password generator prompts the user for a password length (between 8 and 12
 </ul>
 
 ## Preview
+
+(coming soon)
